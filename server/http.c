@@ -99,7 +99,10 @@ int getFileContent(char* relative_path, char** return_body, int length) {
   }
   
   if (file_p == NULL) {
-    return printError("--SERVER-- ERROR: getFileContent - can't open file\n", -1);
+    // favicon.ico is the file that browser put on tab, not a error causing file
+    if (0 != strcmp(relative_path, "favicon.ico")) {
+      return printError("--SERVER-- ERROR: getFileContent - can't open file\n", -1);
+    }
   }
   
   // gets length of file and resets
