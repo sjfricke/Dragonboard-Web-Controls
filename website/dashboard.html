@@ -1,9 +1,82 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="utf-8">
 	<title>DragonWeb Dashboard</title>
+	<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
+
+	<script type="text/javascript" src="lib/jquery-3.2.1.min.js"></script>
+	<script type="text/javascript" src="lib/jquery.canvasjs.min.js"></script>
+
+	<!-- Bootstrap -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/js/bootstrap.min.js" type="text/javascript"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+	<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+
+	<!-- Dashboard -->
+	<link href="css/style.css" rel="stylesheet" type="text/css" />
+
 </head>
 <body onload="init()">
+
+  <!-- <div class="container-fluid"> -->
+    <div class="row">
+
+      <div class="col-sm-4">
+        <div id="chart-cpu"></div>
+        <br>
+      </div>
+
+      <div class="col-sm-4">
+        <div id="gpio-list">
+        	<h3>GPIO Status</h3>
+        	<div class="checkbox">
+			  <label> <input type="checkbox" class="gpio gpio36" checked data-toggle="toggle" data-on="1" data-off="0" data-onstyle="success" data-offstyle="danger"> GPIO 36 [ pin 23 ] </label>
+			</div>
+			<div class="checkbox" >
+			  <label> <input type="checkbox" class="gpio gpio12" checked data-toggle="toggle" data-on="1" data-off="0" data-onstyle="success" data-offstyle="danger"> GPIO 12 [ pin 24 ] </label>
+			</div>
+			<div class="checkbox">
+			  <label> <input type="checkbox" class="gpio gpio13" checked data-toggle="toggle" data-on="1" data-off="0" data-onstyle="success" data-offstyle="danger"> GPIO 13 [ pin 25 ] </label>
+			</div>
+			<div class="checkbox">
+			  <label> <input type="checkbox" class="gpio gpio69" checked data-toggle="toggle" data-on="1" data-off="0" data-onstyle="success" data-offstyle="danger"> GPIO 69 [ pin 26 ] </label>
+			</div>
+			<div class="checkbox">
+			  <label> <input type="checkbox" class="gpio gpio25" checked data-toggle="toggle" data-on="1" data-off="0" data-onstyle="success" data-offstyle="danger"> GPIO 25 [ pin 30 ] </label>
+			</div>
+			<div class="checkbox">
+			  <label> <input type="checkbox" class="gpio gpio35" checked data-toggle="toggle" data-on="1" data-off="0" data-onstyle="success" data-offstyle="danger"> GPIO 35 [ pin 31 ] </label>
+			</div>
+			<div class="checkbox">
+			  <label> <input type="checkbox" class="gpio gpio34" checked data-toggle="toggle" data-on="1" data-off="0" data-onstyle="success" data-offstyle="danger"> GPIO 34 [ pin 32 ] </label>
+			</div>
+			<div class="checkbox">
+			  <label> <input type="checkbox" class="gpio gpio28" checked data-toggle="toggle" data-on="1" data-off="0" data-onstyle="success" data-offstyle="danger"> GPIO 28 [ pin 33 ] </label>
+			</div>
+			<div class="checkbox">
+			  <label> <input type="checkbox" class="gpio gpio33" checked data-toggle="toggle" data-on="1" data-off="0" data-onstyle="success" data-offstyle="danger"> GPIO 33 [ pin 34 ] </label>
+			</div>
+        </div>
+        <br>
+      </div>
+
+      <div class="col-sm-4">
+        <div id="wifi-list">
+			 <h2>WiFi Networks</h2>
+			 <ul class="list-group" id="wifi">
+			  <li class="list-group-item">free</li>
+			</ul>
+        </div>
+        <br>
+      </div>
+
+    </div>
+
+	  <script type="text/javascript" src="src/websocket.js"></script>
+	  <script type="text/javascript" src="src/main.js"></script>
+  <!-- </div> -->
 
 </body>
 </html>

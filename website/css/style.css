@@ -1,13 +1,13 @@
 ﻿body {
-    margin: 0px;
-    overflow: hidden;
+  overflow: hidden;
+  font-family: 'Gotham Rounded SSm A', 'Gotham Rounded SSm B', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  padding: 10vh 2vw 0vh 2vw;
 }
 
-#header {
-    height: 10vh;
-    width: 100%;
-    background-color: lightblue;
-    color: black;
-    font-size: 5vh;
-    text-align: center;
+#gpio-list {
+  text-align: center;
+}
+
+#wifi-list {
+  text-align: center;
 }
