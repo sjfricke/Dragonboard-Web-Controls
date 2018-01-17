@@ -9,11 +9,12 @@ function wsOnMessage(event) {
 
   switch(parseInt(message.type)) {
   case 1: // CPU %
-      // data is packed as "20 30 30 60" string with % spaced out
-      var cpuList = message.value.split(" ");
-      updateCPU(cpuList[0], cpuList[1], cpuList[2], cpuList[3]);
-      break;
-  case 2: // GPIO  
+    // data is packed as "20 30 30 60" string with % spaced out
+    var cpuList = message.value.split(" ");
+    updateCPU(cpuList[0], cpuList[1], cpuList[2], cpuList[3]);
+    break;
+  case 2: // GPIO
+    // data is packed as "gpio value" with value being 0 or 1
     var gpioMsg = message.value.split(" ");
     var toggle = (gpioMsg[1] == 'false') ? false : true;
     updateGPIO(gpioMsg[0], toggle);
@@ -30,7 +31,7 @@ function wsOnMessage(event) {
 }
 
 function wsAllReadyToStart() {
-  webSocket.send("0:0");
+  webSocket.message(0, 0);
 }
 
 /////////////////////////////////////

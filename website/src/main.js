@@ -1,3 +1,8 @@
+$(document).ready(function() {
+
+    init();
+});
+
 function init() {
     setWebSocket();
     setup();
@@ -9,6 +14,12 @@ function setWebSocket() {
     try {
 	   webSocket = new WebSocket('ws://' + location.host);
 	   webSocket.onmessage = wsOnMessage;
+
+        // Used to package values to be sent down to C
+        WebSocket.prototype.message = function(key, ...values) {
+          if (isNaN(key )) { return false; }
+          this.send(key + ":" + values.join(":"));
+        };
     } catch (e) {
 	   location.reload();
     }
@@ -40,14 +51,23 @@ function setup() {
     };
     $("#chart-cpu").CanvasJSChart(cpu_option);
 
-    // keeps watch if we manually change value of GPIO from UI
-    $('.gpio').click(function(event) {
-        if (event.originalEvent) {
-            // if they click the element, but not button need to prevent a double flip
-            event.stopPropagation();
-        }
-    })
+    $("#gpio36").change(function(){
+        webSocket.message(1, 36, $(this).prop("checked") ? 1 : 0)
+    });
+    $("#gpio12").change(function(){
+        webSocket.message(1, 12, $(this).prop("checked") ? 1 : 0)
+    });
+    $("#gpio28").change(function(){
+        webSocket.message(1, 28, $(this).prop("checked") ? 1 : 0)
+    });
+    $("#gpio33").change(function(){
+        webSocket.message(1, 33, $(this).prop("checked") ? 1 : 0)
+    });
 
+}
+
+function toggleGPIO(pin) {
+    console.log(pin);
 }
 
 // Gets percetage of 4 cpus and sets it to be drawn on graph
@@ -72,4 +92,5 @@ function updateWiFi(name, clear) {
         $('#wifi')[0].innerHTML = "";
     } else {
         $('#wifi')[0].innerHTML += "<li class='list-group-item'>" + name + "</li>";
-    }}
+    }
+}

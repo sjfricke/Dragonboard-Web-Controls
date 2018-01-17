@@ -1,7 +1,10 @@
 ﻿body {
-  overflow: hidden;
   font-family: 'Gotham Rounded SSm A', 'Gotham Rounded SSm B', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   padding: 10vh 2vw 0vh 2vw;
+}
+
+#chart-cpu {
+  height: 400px;
 }
 
 #gpio-list {
