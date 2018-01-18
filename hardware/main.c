@@ -43,9 +43,8 @@ int main ( int argc, char* argv[] ) {
   startServer();
 
 
-  int button = GpioDB410cMapping(33);
-  GpioEnablePin(button);
-  GpioSetDirection(button, INPUT_PIN);
+  int button = GpioInputPin(33);
+  int led = GpioOutputPin(34, 0);
   
   temp_file = fopen(sys_temp, "r");
   while(1) {

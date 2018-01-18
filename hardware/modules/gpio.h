@@ -13,8 +13,6 @@
 #define LOW 0
 #define OUT "out"
 #define IN "in"
-#define INPUT_PIN 0
-#define OUTPUT_PIN 1
 
 #define GPIO_EXPORT_PATH "/sys/class/gpio/export"
 #define GPIO_UNEXPORT_PATH "/sys/class/gpio/unexport"
@@ -24,35 +22,49 @@
 // recognized in Linux. This function is used
 // to get the Linux pin with the J8 pin
 // Returns 0 of invalid pin
-uint16_t GpioDB410cMapping(int header_pin);
+uint16_t GpioDB410cMapping(uint16_t pin);
 
-// Enables access to GPIO pin
+// Enables access to GPIO
 // Return 0 if successful, otherwise failed
-int GpioEnablePin(uint16_t pin);
+int GpioEnable(uint16_t gpio);
 
-// Disables access to GPIO pin
+// Disables access to GPIO
 // Return 0 if successful, otherwise failed
-int GpioDisablePin(uint16_t pin);
+int GpioDisable(uint16_t gpio);
 
-// Sets the direction of pin passed in
-// Input direction  == 0
-// Output direction == 1
+// Sets the direction of gpio passed in
+// Input direction  == IN
+// Output direction == OUT
 // Return 0 if successful, otherwise failed
-int GpioSetDirection(uint16_t pin, int direction);
+int GpioSetDirection(uint16_t gpio, char* direction);
 
-// Gets the direction of pin passed in
-// Invalid pin      == -1
+// Gets the direction of gpio passed in
+// Invalid gpio      == -1
 // Input direction  ==  0
 // Output direction ==  1
-int GpioGetDirection(uint16_t pin);
-
-// TODO: skip validation to increase speed?
-// Sets the value of pin passed in
 // Return 0 if successful, otherwise failed
-int GpioSetValue(uint16_t pin, int value);
+int GpioGetDirection(uint16_t gpio);
 
-// Gets the value of pin passed in
-// Returns -1 for invalid pin
-int GpioGetValue(uint16_t pin);
+// Sets the value of gpio passed in
+// Return 0 if successful, otherwise failed
+int GpioSetValue(uint16_t gpio, uint16_t value);
+
+// Gets the value of gpio passed in
+// Returns -1 for invalid gpio
+int GpioGetValue(uint16_t gpio);
+
+/////////////////////////////////////////////////////////
+// These next functions are wrapping of the calls      //
+// above to help make main code less verbose if wanted //
+
+// enable and set as input
+// returns gpio if successful, 0 if failed
+uint16_t GpioInput(uint16_t gpio);
+uint16_t GpioInputPin(uint16_t pin);
+
+// enable and set as output with value
+// returns gpio if successful, 0 if failed
+uint16_t GpioOutput(uint16_t gpio, uint16_t value);
+uint16_t GpioOutputPin(uint16_t pin, uint16_t value);
 
 #endif

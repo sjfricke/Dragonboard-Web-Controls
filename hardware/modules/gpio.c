@@ -1,13 +1,13 @@
 #include "gpio.h"
 
-uint16_t GpioDB410cMapping(int header_pin) {
+uint16_t GpioDB410cMapping(uint16_t pin) {
   // only pin 23-34
-  if (header_pin < 23 || header_pin > 34) {
-    printf("ERROR: Pin %d does not have a GPIO pin mapped\n", header_pin);
+  if (pin < 23 || pin > 34) {
+    printf("ERROR: Pin %d does not have a GPIO pin mapped\n", pin);
     return 0;
   }
-
-  switch(header_pin) {
+  
+  switch(pin) {
   case 23: return 36;
   case 24: return 12;
   case 25: return 13;
@@ -24,7 +24,7 @@ uint16_t GpioDB410cMapping(int header_pin) {
   }
 }
 
-int GpioEnablePin(uint16_t pin) {
+int GpioEnable(uint16_t gpio) {
   FILE *fp;
 
   fp = fopen(GPIO_EXPORT_PATH, "w");
@@ -33,13 +33,13 @@ int GpioEnablePin(uint16_t pin) {
     return -1;
   }
 
-  fprintf(fp, "%u", pin);
+  fprintf(fp, "%u", gpio);
   fclose(fp);
 
   return 0;
 }
 
-int GpioDisablePin(uint16_t pin) {
+int GpioDisable(uint16_t gpio) {
   FILE *fp;
 
   fp = fopen(GPIO_UNEXPORT_PATH, "w");
@@ -48,17 +48,17 @@ int GpioDisablePin(uint16_t pin) {
     return -1;
   }
 
-  fprintf(fp, "%u", pin);
+  fprintf(fp, "%u", gpio);
   fclose(fp);
 
   return 0;
 }
 
-int GpioSetDirection(uint16_t pin, int direction) {
+int GpioSetDirection(uint16_t gpio, char* direction) {
   FILE *fp;
   char direction_path[64];
 
-  sprintf(direction_path, "/sys/class/gpio/gpio%u/direction", pin);
+  sprintf(direction_path, "/sys/class/gpio/gpio%u/direction", gpio);
 
   fp = fopen(direction_path, "w");
   if (fp == NULL) {
@@ -66,27 +66,19 @@ int GpioSetDirection(uint16_t pin, int direction) {
     return -1;
   }
 
-  if (direction == 0) {
-    fputs(IN, fp);
-  } else if (direction == 1) {
-    fputs(OUT, fp);
-  } else {
-    printf("ERROR: Could not set direction %d\n", direction);
-    fclose(fp);
-    return -1;
-  }
+  fputs(direction, fp);
  
   fclose(fp);
   return 0; 
 }
 
-int GpioGetDirection(uint16_t pin) {
+int GpioGetDirection(uint16_t gpio) {
   FILE *fp;
   char direction_path[64];
   char direction[8];
   int return_direction;
   
-  sprintf(direction_path, "/sys/class/gpio/gpio%u/direction", pin);
+  sprintf(direction_path, "/sys/class/gpio/gpio%u/direction", gpio);
 
   fp = fopen(direction_path, "r");
   if (fp == NULL) {
@@ -109,11 +101,11 @@ int GpioGetDirection(uint16_t pin) {
   return return_direction;
 }
 
-int GpioSetValue(uint16_t pin, int value) {
+int GpioSetValue(uint16_t gpio, uint16_t value) {
   FILE *fp;
   char value_path[64];
 
-  sprintf(value_path, "/sys/class/gpio/gpio%u/value", pin);
+  sprintf(value_path, "/sys/class/gpio/gpio%u/value", gpio);
   
   fp = fopen(value_path, "w");
   if (fp == NULL) {
@@ -135,13 +127,13 @@ int GpioSetValue(uint16_t pin, int value) {
   return 0; 
 }
 
-int GpioGetValue(uint16_t pin) {
+int GpioGetValue(uint16_t gpio) {
   FILE *fp;
   char value_path[64];
   char value[8];
   
-  sprintf(value_path, "/sys/class/gpio/gpio%u/value", pin);
-
+  sprintf(value_path, "/sys/class/gpio/gpio%u/value", gpio);
+  
   fp = fopen(value_path, "r");
   if (fp == NULL) {
     printf("ERROR: Could not open file: %s\n", value_path);
@@ -153,4 +145,32 @@ int GpioGetValue(uint16_t pin) {
   fclose(fp);
 
   return atoi(value);   
+}
+
+uint16_t GpioInput(uint16_t gpio) {
+  if (0 != GpioEnable(gpio)) { return 0; }
+  if (0 != GpioSetDirection(gpio, IN)) { return  0; }
+  return gpio;
+}
+
+uint16_t GpioInputPin(uint16_t pin) {
+  uint16_t gpio = GpioDB410cMapping(pin);
+  if (0 != GpioEnable(gpio)) { return 0; }
+  if (0 != GpioSetDirection(gpio, IN)) { return 0; }
+  return gpio;
+}
+
+uint16_t GpioOutput(uint16_t gpio, uint16_t value) {
+  if (0 != GpioEnable(gpio)) { return 0; }
+  if (0 != GpioSetDirection(gpio, OUT)) { return 0; }
+  if (0 != GpioSetValue(gpio, value)) { return 0; }
+  return gpio;
+}
+
+uint16_t GpioOutputPin(uint16_t pin, uint16_t value) {
+  uint16_t gpio = GpioDB410cMapping(pin);
+  if (0 != GpioEnable(gpio)) { return 0; }
+  if (0 != GpioSetDirection(gpio, OUT)) { return 0; }
+  if (0 != GpioSetValue(gpio, value)) { return 0; }
+  return gpio;
 }
