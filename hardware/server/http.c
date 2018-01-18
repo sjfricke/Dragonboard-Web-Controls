@@ -81,7 +81,7 @@ int getFileContent(char* relative_path, char** return_body, int length) {
   
   strcpy(file_path, WEBSITE_FOLDER);
   strcat(file_path, relative_path);  
-  
+  printf("DEBUG: file_path == %s\n", file_path);  
   // need to decide if file is text or binary
   file_ext = strrchr(relative_path, PERIOD);
 

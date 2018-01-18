@@ -49,24 +49,17 @@ void broadcastString(char* type, char* value)
   broadcast(broadcast_string);
 }
 
-void broadcastSpeech(char* type, char* value)
-{
-  char broadcast_string[37 + strlen(type) + strlen(value)];
-  sprintf(broadcast_string, "{\"type\":\"8\",\"value\":\"%s\",\"chat\":\"%s\"}", type, value);
-  broadcast(broadcast_string);
-}
-
 void broadcast(char* broadcast_string)
 {
   ws_message *message = messageNew();
   message->len = strlen(broadcast_string);
-					
+
   char *temp = malloc( sizeof(char)*(message->len+1) );
   if (temp == NULL) {
-    raise(SIGINT);		
+    raise(SIGINT);
     return;
   }
-  
+
   memset(temp, '\0', (message->len+1));
   memcpy(temp, broadcast_string, message->len);
   message->msg = temp;
@@ -78,10 +71,10 @@ void broadcast(char* broadcast_string)
     raise(SIGINT);
     return;
   }
-
+printf("DEBUG: %s\n", message->msg);
   listMulticastAll(g_server->list, message);
   messageFree(message);
-  free(message);	   
+  free(message);
 }
 
 void* serverDaemon() {

@@ -18,7 +18,6 @@
 #include "sha1.h"
 #include "base64.h"
 
-#define WEBSITE_FOLDER "website"
 #define PRINT_ERRORS 1
 
 #define BUFFER_SIZE 8192          // 8KB

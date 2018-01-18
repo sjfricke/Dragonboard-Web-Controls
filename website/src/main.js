@@ -1,6 +1,5 @@
 $(document).ready(function() {
-
-    init();
+    init(); // wait for DOM to load
 });
 
 function init() {
@@ -14,12 +13,6 @@ function setWebSocket() {
     try {
 	   webSocket = new WebSocket('ws://' + location.host);
 	   webSocket.onmessage = wsOnMessage;
-
-        // Used to package values to be sent down to C
-        WebSocket.prototype.message = function(key, ...values) {
-          if (isNaN(key )) { return false; }
-          this.send(key + ":" + values.join(":"));
-        };
     } catch (e) {
 	   location.reload();
     }
@@ -52,16 +45,16 @@ function setup() {
     $("#chart-cpu").CanvasJSChart(cpu_option);
 
     $("#gpio36").change(function(){
-        webSocket.message(1, 36, $(this).prop("checked") ? 1 : 0)
+        broadcast(1, 36, $(this).prop("checked") ? 1 : 0)
     });
     $("#gpio12").change(function(){
-        webSocket.message(1, 12, $(this).prop("checked") ? 1 : 0)
+        broadcast(1, 12, $(this).prop("checked") ? 1 : 0)
     });
     $("#gpio28").change(function(){
-        webSocket.message(1, 28, $(this).prop("checked") ? 1 : 0)
+        broadcast(1, 28, $(this).prop("checked") ? 1 : 0)
     });
     $("#gpio33").change(function(){
-        webSocket.message(1, 33, $(this).prop("checked") ? 1 : 0)
+        broadcast(1, 33, $(this).prop("checked") ? 1 : 0)
     });
 
 }

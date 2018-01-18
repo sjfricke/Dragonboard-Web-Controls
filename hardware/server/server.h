@@ -18,13 +18,13 @@ server_t* setupSever(void);
 // Call to spin up an HTTP sever
 void startServer();
 
-// Used to broadcast to all websockets a number as a double
-void broadcastNumber(char* type, double value);
+// Used to broadcast to all websockets a number as a double or int
+void broadcastDouble(char* type, double value);
+void broadcastInt(char* type, int value);
 
 // overload method to broadcast string
 void broadcastString(char* type, char* value);
-void broadcastSpeech(char* type, char* value);
-void broadcastInt(char* type, int value);
+
 
 //////////////////////////////////////
 /////////  Internal Helpers //////////

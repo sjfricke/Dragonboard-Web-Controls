@@ -1,9 +1,16 @@
 // global WebSocket pointer
 var webSocket;
 
+// Used to package values to be sent down to C
+function broadcast(key, ...values) {
+    if (isNaN(key )) { return false; }
+    webSocket.send(key + ":" + values.join(":"));
+};
+
+
 // decides what do when message arrives
 function wsOnMessage(event) {
-
+console.log(event);
   // Message looks like => { "type" : 1, "value" : 0 }
   var message = JSON.parse(event.data);
 
@@ -25,13 +32,20 @@ function wsOnMessage(event) {
   case 4: // WiFi add
     updateWiFi(message.value);
     break;
+  case 5: // button color changer
+      if (message.value == 1) {
+	  document.body.style.backgroundColor = "red";
+      } else {
+	  document.body.style.backgroundColor = "white";
+      }
+      break;
   default:
 	  warn("WebSocket", "No case for data: %0", message);
   }
 }
 
 function wsAllReadyToStart() {
-  webSocket.message(0, 0);
+  broadcast(0, 0);
 }
 
 /////////////////////////////////////

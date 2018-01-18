@@ -1,11 +1,4 @@
-DragonWeb
-
-# camera photos
-website/res/img/camera_image*.*jpg
-
-website/src/highscore.js
-
-servo_state.truman
+hardware/DragonWeb
 
 # Node test server
 node_modules

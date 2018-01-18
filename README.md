@@ -46,3 +46,8 @@ You may run into wanting to run your website, but without DragonWeb running you 
 2. `npm install` in this directory
 3. `node boardless_testing.js`
 4. Go to http://localhost:8000
+
+
+## Why need to be root user
+
+The goal is that you should be able to run this as a non-root user, but with things like GPIO pin access and other hardware, root made development easier.

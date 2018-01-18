@@ -2,7 +2,8 @@
 #define __HTTP_H__
 
 #include "util.h"
-//#include "api.h"
+
+#define WEBSITE_FOLDER "../website"
 
 void* httpHandle(http_client* http_config);
 
