@@ -23,16 +23,18 @@ void* httpHandle(http_client* http_config) {
   // gets contents from file to send back in response boday
   content_length = getFileContent(http_config->header->route,
 				  &http_config->response_HTTP,
+				  http_config->content_type,
 				  MAX_RESPONSE_SIZE);
 
   if (content_length < 0) {
-    sprintf(http_config->response_HTTP, "HTTP/1.1 400 OK\r\nCache-Control: no-cache, private\r\nDate: %s\r\n\r\n", http_config->timestamp);
+    sprintf(http_config->response_HTTP, "HTTP/1.1 %s\r\nCache-Control: no-cache, private\r\nDate: %s\r\n\r\n", BAD_REQ, http_config->timestamp);
     header_length = strlen(http_config->response_HTTP);
     header_offset = 0;
     content_length = 0; // need for send() logic
   } else {
     // gets a pointer where the response_body starts
-    sprintf(http_config->response_header, "HTTP/1.1 200 OK\r\nCache-Control: no-cache, private\r\nContent-Length: %i\r\nDate: %s\r\n\r\n", content_length, http_config->timestamp);
+    sprintf(http_config->response_header, "HTTP/1.1 %s\r\nCache-Control: no-cache, private\r\nContent-Type: %s\r\nContent-Length: %i\r\nDate: %s\r\n\r\n", GOOD_REQ, http_config->content_type, content_length, http_config->timestamp);
+    
     header_length = strlen(http_config->response_header);
 
     if (content_length + header_length > MAX_RESPONSE_SIZE) {
@@ -63,7 +65,7 @@ void* httpHandle(http_client* http_config) {
 return NULL;
 }
 
-int getFileContent(char* relative_path, char** return_body, int length) {
+int getFileContent(char* relative_path, char** return_body, char* content_type, int length) {
 
   FILE* file_p;
   int   content_length;
@@ -89,6 +91,8 @@ int getFileContent(char* relative_path, char** return_body, int length) {
     return printError("--SERVER-- ERROR: getFileContent - no file extension\n", -1);
   }
 
+  getMime(file_ext, content_type);
+  
   // Only opens as text file if one of accepted text file types
   if ( 0 == strcmp(file_ext, ".html") ||
        0 == strcmp(file_ext, ".css")  ||
@@ -120,4 +124,71 @@ int getFileContent(char* relative_path, char** return_body, int length) {
   fread(*return_body + front_offset, content_length, 1, file_p);
   fclose(file_p);
   return content_length;
+}
+
+// Creates a new http client object
+http_client* httpClientNew (int socket_con, char* address) {
+  http_client* node = (http_client*) malloc(sizeof(http_client));
+
+  if (NULL != node) {
+    node->socket_id = socket_con;
+    node->client_ip = address;
+    node->header = NULL;
+    node->response_HTTP = (char*)malloc(MAX_RESPONSE_SIZE + 2); // +2 for \r\n
+    node->response_header = (char*)malloc(MAX_HEADER_SIZE); // TODO reset limit?
+    node->content_type = (char*)malloc(sizeof(char)*32);
+    node->timestamp = (char*)malloc(sizeof(char)*256);
+  }
+
+  return node;
+}
+
+// Frees all allocations in the node, including the header and message 
+void httpClientFree(http_client* client) {
+
+  if (NULL != client->client_ip) {
+    free(client->client_ip);
+    client->client_ip = NULL;
+  }
+  
+  if (NULL != client->header) {
+    headerFree(client->header);
+    free(client->header);
+    client->header = NULL;
+  }
+
+  if (NULL != client->response_HTTP) {
+    free(client->response_HTTP);
+    client->response_HTTP = NULL;
+  }
+  
+  if (NULL != client->response_header) {
+    free(client->response_header);
+    client->response_header = NULL;
+  }
+
+  if (NULL != client->content_type) {
+    free(client->content_type);
+    client->content_type = NULL;
+  }
+  
+  if (NULL != client->timestamp) {
+    free(client->timestamp);
+    client->timestamp = NULL;
+  }
+}
+void getMime(char* ext, char* mime) {
+
+  if ( 0 == strcmp(ext, ".html")) { strcpy(mime, "text/html"); return; }
+  else if ( 0 == strcmp(ext, ".css")) { strcpy(mime, "text/css"); return; }
+  else if ( 0 == strcmp(ext, ".js")) { strcpy(mime, "text/javascript"); return; }
+  else if ( 0 == strcmp(ext, ".png")) { strcpy(mime, "image/png"); return; }
+  else if ( 0 == strcmp(ext, ".jpeg") ||  0 == strcmp(ext, ".jpg")) { strcpy(mime, "image/jpeg"); return; }
+  else if ( 0 == strcmp(ext, ".midi")) { strcpy(mime, "audio/midi"); return; }
+  else if ( 0 == strcmp(ext, ".mp3")) { strcpy(mime, "audio/mpeg"); return; }
+  else if ( 0 == strcmp(ext, ".wav")) { strcpy(mime, "audio/wav"); return; }
+  else if ( 0 == strcmp(ext, ".xml")) { strcpy(mime, "application/xml"); return; }
+  else if ( 0 == strcmp(ext, ".pdf")) { strcpy(mime, "application/pdf"); return; }
+  else { strcpy(mime, "text/plain"); return; }
+
 }

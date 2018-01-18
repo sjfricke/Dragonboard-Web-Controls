@@ -83,15 +83,6 @@ typedef struct ws_client_n {
   struct ws_client_n* next;
 } ws_client;
 
-typedef struct http_client {
-  int socket_id;
-  char* client_ip;
-  char* response_HTTP;
-  char* response_header;
-  char* timestamp;
-  request_header* header;
-} http_client;
-
 // We need a list to hold all the current WS clients
 typedef struct {
   int len;
@@ -144,7 +135,6 @@ char* getMemoryChar(char* token, int length);
 
 // New structures.
 ws_client* wsClientNew(int socket_con, char* address);
-http_client* httpClientNew(int socket_con, char* address);
 request_header* headerNew();
 ws_message* messageNew();
 
@@ -152,6 +142,5 @@ ws_message* messageNew();
 void headerFree(request_header* header);
 void messageFree(ws_message* message);
 void wsClientFree(ws_client* client);
-void httpClientFree(http_client* client);
 
 #endif

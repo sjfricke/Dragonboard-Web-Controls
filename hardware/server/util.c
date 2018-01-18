@@ -261,22 +261,6 @@ ws_client* wsClientNew (int socket_con, char* address) {
   return node;
 }
 
-// Creates a new http client object
-http_client* httpClientNew (int socket_con, char* address) {
-  http_client* node = (http_client*) malloc(sizeof(http_client));
-
-  if (NULL != node) {
-    node->socket_id = socket_con;
-    node->client_ip = address;
-    node->header = NULL;
-    node->response_HTTP = (char*)malloc(MAX_RESPONSE_SIZE + 2); // +2 for \r\n
-    node->response_header = (char*)malloc(MAX_HEADER_SIZE); // TODO reset limit?
-    node->timestamp = (char*)malloc(sizeof(char)*256);
-  }
-
-  return node;
-}
-
 // Creates a new header structure.
 request_header* headerNew() {
   request_header* header = (request_header*) malloc(sizeof(request_header));
@@ -381,35 +365,5 @@ void wsClientFree(ws_client* client) {
     messageFree(client->message);
     free(client->message);
     client->message = NULL;
-  }
-}
-
-// Frees all allocations in the node, including the header and message 
-void httpClientFree(http_client* client) {
-
-  if (NULL != client->client_ip) {
-    free(client->client_ip);
-    client->client_ip = NULL;
-  }
-  
-  if (NULL != client->header) {
-    headerFree(client->header);
-    free(client->header);
-    client->header = NULL;
-  }
-
-  if (NULL != client->response_HTTP) {
-    free(client->response_HTTP);
-    client->response_HTTP = NULL;
-  }
-  
-  if (NULL != client->response_header) {
-    free(client->response_header);
-    client->response_header = NULL;
-  }
-  
-  if (NULL != client->timestamp) {
-    free(client->timestamp);
-    client->timestamp = NULL;
   }
 }
