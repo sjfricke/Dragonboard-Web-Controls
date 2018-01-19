@@ -1,6 +1,6 @@
 #include "wifi.h"
 
-int WifiScan(char** list, int maxListLen, int maxNameLen) {
+int WifiScan(char** list, int maxListLen, int maxNameLen, int options) {
 
   wireless_scan_head head;
   wireless_scan *result;
@@ -8,7 +8,9 @@ int WifiScan(char** list, int maxListLen, int maxNameLen) {
   int sock;
   int resCount = 0;
   int scanCount = 0;
+  double rcpilevel;
   char buffer[256];
+
   /* Open socket to kernel */
   sock = iw_sockets_open();
 
@@ -23,20 +25,20 @@ int WifiScan(char** list, int maxListLen, int maxNameLen) {
     printf("--WIFI-- Error during iw_scan. Aborting.\n");
     return -1;
   }
-  
+
   /* Traverse the results */
   result = head.result;
   while (NULL != result && resCount < maxListLen) {
-    
-    strncpy(list[resCount], result->b.essid, maxNameLen);
 
-    iw_print_stats(buffer,
-		   sizeof(buffer),
-		   &result->stats.qual,
-		   &range,
-		   1);
-    printf("stats: %s\n", buffer);
-    
+    if ((options & 0x1) != 0) {
+      rcpilevel = (result->stats.qual.level / 2.0) - 110.0;
+      sprintf(buffer, "%s [%g dBm]", result->b.essid, rcpilevel);
+
+      strncpy(list[resCount], buffer, maxNameLen);
+    } else {
+      strncpy(list[resCount], result->b.essid, maxNameLen);
+    }
+
     result = result->next;
     scanCount++;
     resCount++;

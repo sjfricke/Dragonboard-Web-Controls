@@ -49,7 +49,7 @@ int main ( int argc, char* argv[] ) {
   startServer();
 
   
-  int wMaxName = 24;
+  int wMaxName = 48;
   int wMaxList = 16;
   char** wList;
 
@@ -74,13 +74,11 @@ int main ( int argc, char* argv[] ) {
       broadcastInt("5", 0);
     }
 
-      status = WifiScan(wList, wMaxList, wMaxName);
-      printf("scan count: %d\n", status);
-      broadcastInt("3", 0);
-      for (int i = 0; i < status; i++) {
-	printf("%d : %s\n", i, wList[i]);
-	broadcastString("4", wList[i]);
-      }
+    status = WifiScan(wList, wMaxList, wMaxName, 0x1);
+    broadcastInt("3", 0);
+    for (int i = 0; i < status; i++) {
+      broadcastString("4", wList[i]);
+    }
 
     //fscanf(temp_file, "%lf", &cur_temp);
     // cur_temp /= 1000;
