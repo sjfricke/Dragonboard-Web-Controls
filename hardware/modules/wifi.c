@@ -1,38 +1,34 @@
-// apt install libiw-dev
-// add -liw in compile line
-// Docs: http://docs.ros.org/jade/api/heatmap/html/iwlib_8h.html
+#include "wifi.h"
 
-#include <stdio.h>
-#include <time.h>
-#include <iwlib.h>
+int WifiScan(char** list, int maxListLen, int maxNameLen) {
 
-int main(void) {
   wireless_scan_head head;
   wireless_scan *result;
   iwrange range;
   int sock;
+  int resCount = 0;
+  int scanCount = 0;
   char buffer[256];
-
   /* Open socket to kernel */
   sock = iw_sockets_open();
 
   /* Get some metadata to use for scanning */
   if (iw_get_range_info(sock, "wlan0", &range) < 0) {
-    printf("Error during iw_get_range_info. Aborting.\n");
-    exit(2);
+    printf("--WIFI-- Error during iw_get_range_info. Aborting.\n");
+    return -1;
   }
 
   /* Perform the scan */
   if (iw_scan(sock, "wlan0", range.we_version_compiled, &head) < 0) {
-    printf("Error during iw_scan. Aborting.\n");
-    exit(2);
+    printf("--WIFI-- Error during iw_scan. Aborting.\n");
+    return -1;
   }
-
+  
   /* Traverse the results */
   result = head.result;
-  while (NULL != result) {
-    printf("%s\n", result->b.essid);
+  while (NULL != result && resCount < maxListLen) {
     
+    strncpy(list[resCount], result->b.essid, maxNameLen);
 
     iw_print_stats(buffer,
 		   sizeof(buffer),
@@ -42,8 +38,9 @@ int main(void) {
     printf("stats: %s\n", buffer);
     
     result = result->next;
+    scanCount++;
+    resCount++;
   }
 
-  puts("------------------\n");
-  exit(0);
+  return scanCount;
 }

@@ -2,8 +2,10 @@
 #include <unistd.h>
 #include "server/server.h"
 #include "modules/gpio.h"
+#include "modules/wifi.h"
 
 extern server_t* g_server;
+static int status;
 
 void socketCallback( int type, const char* value) {
   // To declare variables inside case you need to enable a scope with { }
@@ -46,6 +48,17 @@ int main ( int argc, char* argv[] ) {
 
   startServer();
 
+  
+  int wMaxName = 24;
+  int wMaxList = 16;
+  char** wList;
+
+  wList = (char**)malloc(sizeof(char*) * wMaxList);
+  for (int i = 0; i < wMaxList; i++) {
+    wList[i] = (char*)malloc(sizeof(char) * wMaxName);
+  }
+  
+
 
   int button = GpioInputPin(33);
   //  int led = GpioOutputPin(34, 0);
@@ -60,10 +73,25 @@ int main ( int argc, char* argv[] ) {
     } else {
       broadcastInt("5", 0);
     }
+
+      status = WifiScan(wList, wMaxList, wMaxName);
+      printf("scan count: %d\n", status);
+      broadcastInt("3", 0);
+      for (int i = 0; i < status; i++) {
+	printf("%d : %s\n", i, wList[i]);
+	broadcastString("4", wList[i]);
+      }
+
     //fscanf(temp_file, "%lf", &cur_temp);
     // cur_temp /= 1000;
    //printf("Temp: %lf degrees\n", cur_temp);
     // rewind(temp_file); // need to rewind file pointer
-    usleep(1000000); // 1 sec
+    usleep(5000000); // 5 sec
   }
+
+  for (int i = 0; i < wMaxList; i++) {
+    free(wList[i]);
+  }
+  free(wList);
+
 }
