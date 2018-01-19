@@ -34,6 +34,7 @@ typedef void (*callbackChar)(char);
 typedef void (*callbackInt)(int);
 typedef void (*callbackDouble)(double);
 typedef void (*callbackIntStr)(int, char*);
+typedef void (*callbackIntConstStr)(int, const char*);
 
 typedef enum {
   GET,
@@ -52,7 +53,7 @@ typedef struct {
   char opcode[1];
   char mask[4];
   uint64_t len;
-  uint64_t enc_len; 
+  uint64_t enc_len;
   uint64_t next_len;
   char *msg;
   char *next;
@@ -87,15 +88,15 @@ typedef struct ws_client_n {
 typedef struct {
   int len;
   ws_client *first;
-  ws_client *last;	
+  ws_client *last;
   pthread_mutex_t lock;
 } ws_list;
 
 // Configuration info sent from server
 typedef struct server_t {
-  int             port;
-  ws_list*        list;
-  callbackIntStr  onData;
+  int                  port;
+  ws_list*             list;
+  callbackIntConstStr  onSocketMessage;
 } server_t;
 
 //////////////////////////////////////////

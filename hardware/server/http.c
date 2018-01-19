@@ -16,7 +16,7 @@ void* httpHandle(http_client* http_config) {
 
   // status = callApiRoute(&request_HTTP, &response_HTTP, route, (http_t*)config);
   // Not a API route, checking for file
-      
+
   // generates timestamp for response header
   getTime(&http_config->timestamp, 256);
 
@@ -34,13 +34,13 @@ void* httpHandle(http_client* http_config) {
   } else {
     // gets a pointer where the response_body starts
     sprintf(http_config->response_header, "HTTP/1.1 %s\r\nCache-Control: no-cache, private\r\nContent-Type: %s\r\nContent-Length: %i\r\nDate: %s\r\n\r\n", GOOD_REQ, http_config->content_type, content_length, http_config->timestamp);
-    
+
     header_length = strlen(http_config->response_header);
 
     if (content_length + header_length > MAX_RESPONSE_SIZE) {
       // TODO - too large of response
     }
-	
+
     // offset where header is from start of buffer
     header_offset = MAX_RESPONSE_SIZE - content_length - header_length;
 
@@ -55,14 +55,14 @@ void* httpHandle(http_client* http_config) {
   //} else {
   //  tODO error
   //}
-  
+
   send(http_config->socket_id, http_config->response_HTTP + header_offset, header_length + content_length, 0);
 
   close(http_config->socket_id);
 
   free(http_config->header);
-    
-return NULL;
+
+  return NULL;
 }
 
 int getFileContent(char* relative_path, char** return_body, char* content_type, int length) {
@@ -75,15 +75,15 @@ int getFileContent(char* relative_path, char** return_body, char* content_type, 
   const char PERIOD = '.';
 
   printf("File: %s\n", relative_path);
-  
+
   // make default site index.html if no path set
   if (1 == strlen(relative_path) && strncmp(relative_path, "/", 1) == 0) {
     strcat(relative_path, "index.html");
   }
-  
+
   strcpy(file_path, WEBSITE_FOLDER);
-  strcat(file_path, relative_path);  
-  printf("DEBUG: file_path == %s\n", file_path);  
+  strcat(file_path, relative_path);
+  printf("DEBUG: file_path == %s\n", file_path);
   // need to decide if file is text or binary
   file_ext = strrchr(relative_path, PERIOD);
 
@@ -92,28 +92,28 @@ int getFileContent(char* relative_path, char** return_body, char* content_type, 
   }
 
   getMime(file_ext, content_type);
-  
+
   // Only opens as text file if one of accepted text file types
   if ( 0 == strcmp(file_ext, ".html") ||
        0 == strcmp(file_ext, ".css")  ||
        0 == strcmp(file_ext, ".js")) {
     file_p = fopen(file_path, "r");
-  } else {  
+  } else {
     file_p = fopen(file_path, "rb");
   }
-  
+
   if (file_p == NULL) {
     // favicon.ico is the file that browser put on tab, not a error causing file
     if (0 != strcmp(relative_path, "favicon.ico")) {
       return printError("--SERVER-- ERROR: getFileContent - can't open file\n", -1);
     }
   }
-  
+
   // gets length of file and resets
   fseek(file_p, 0, SEEK_END);
   content_length = ftell(file_p);
   fseek(file_p, 0, SEEK_SET);
-  
+
   if (content_length > length) {
     return printError("--SERVER-- ERROR: getFileContent - File to large\n", -1);
   } else {
@@ -143,14 +143,14 @@ http_client* httpClientNew (int socket_con, char* address) {
   return node;
 }
 
-// Frees all allocations in the node, including the header and message 
+// Frees all allocations in the node, including the header and message
 void httpClientFree(http_client* client) {
 
   if (NULL != client->client_ip) {
     free(client->client_ip);
     client->client_ip = NULL;
   }
-  
+
   if (NULL != client->header) {
     headerFree(client->header);
     free(client->header);
@@ -161,7 +161,7 @@ void httpClientFree(http_client* client) {
     free(client->response_HTTP);
     client->response_HTTP = NULL;
   }
-  
+
   if (NULL != client->response_header) {
     free(client->response_header);
     client->response_header = NULL;
@@ -171,7 +171,7 @@ void httpClientFree(http_client* client) {
     free(client->content_type);
     client->content_type = NULL;
   }
-  
+
   if (NULL != client->timestamp) {
     free(client->timestamp);
     client->timestamp = NULL;

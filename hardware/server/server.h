@@ -7,6 +7,9 @@
 
 // Single global server instances
 server_t* g_server;
+// Global threads
+pthread_t server_thread;
+pthread_t ws_thread;
 
 ////////////////////////////////////
 /////////// Server Methods /////////
@@ -24,24 +27,5 @@ void broadcastInt(char* type, int value);
 
 // overload method to broadcast string
 void broadcastString(char* type, char* value);
-
-
-//////////////////////////////////////
-/////////  Internal Helpers //////////
-//////////////////////////////////////
-// TODO make these static
-
-// Creates a new thread to run the Daemon server
-void* serverDaemon();
-
-// sends a formated string to all sockets
-void broadcast(char* broadcast_string);
-
-// takes request and parses header to struct
-// returns header if valid, NULL if error
-request_header* parseHeader(char** request_all);
-
-// Takes header and adds a valid SHA-1 key
-void getSHA(request_header* header);
 
 #endif

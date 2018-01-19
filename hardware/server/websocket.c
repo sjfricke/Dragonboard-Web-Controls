@@ -24,18 +24,18 @@ void* wsHandle(void* client_arg) {
   memset(next, '\0', BUFFER_SIZE);
 
   // get from adding values I did once... trust this please I guess
-  length = ACCEPT_HEADER_V3_LEN  
+  length = ACCEPT_HEADER_V3_LEN
     + ACCEPT_UPGRADE_LEN +  client->header->upgrade_length
     + ACCEPT_CONNECTION_LEN
     + ACCEPT_KEY_LEN + client->header->accept_length
     + (2*3);
-   
+
   response = getMemoryChar("", length);
-		
+
   if (response == NULL) {
     printf("--SERVER-- ERROR: Allocating response ws\n");
   }
-	
+
   memcpy(response + memlen, ACCEPT_HEADER_V3, ACCEPT_HEADER_V3_LEN);
   memlen += ACCEPT_HEADER_V3_LEN;
 
@@ -53,7 +53,7 @@ void* wsHandle(void* client_arg) {
 
   memcpy(response + memlen, ACCEPT_KEY, ACCEPT_KEY_LEN);
   memlen += ACCEPT_KEY_LEN;
-		
+
   memcpy(response + memlen, client->header->accept, client->header->accept_length);
   memlen += client->header->accept_length;
 
@@ -70,11 +70,11 @@ void* wsHandle(void* client_arg) {
   if (NULL != response) {
     free(response);
   }
-  
+
   // add new connection to list
   listAdd(g_server->list, client);
   pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-  
+
   printf("--SERVER-- Client %s was added like... a boss!\n", client->client_ip);
 
   // loop sending messages back and forth until close
@@ -85,7 +85,7 @@ void* wsHandle(void* client_arg) {
 
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
     listMulticast(g_server->list, client);
-    callbackHandler(client->message->msg);    
+    callbackHandler(client->message->msg);
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 
     if (client->message != NULL) {
@@ -94,7 +94,7 @@ void* wsHandle(void* client_arg) {
       next_len = client->message->next_len;
       messageFree(client->message);
       free(client->message);
-      client->message = NULL;	
+      client->message = NULL;
     }
   }
 
@@ -125,15 +125,15 @@ int communicate(ws_client* node, char *next, uint64_t next_len) {
 
   // Receiving and decoding the message.
   do {
-    memset(buffer, '\0', BUFFER_SIZE);			
+    memset(buffer, '\0', BUFFER_SIZE);
     memcpy(buffer, next, next_len);
 
     // If we end in this case, we have not got enough of the frame to
     // do something useful to it. Therefore, do yet another read operation
     if (next_len <= 6 || ((next[1] & 0x7f) == 126 && next_len <= 8) ||
 	((next[1] & 0x7f) == 127 && next_len <= 14)) {
-      
-      if ((buffer_length = recv(node->socket_id, (buffer+next_len), 
+
+      if ((buffer_length = recv(node->socket_id, (buffer+next_len),
 				(BUFFER_SIZE-next_len), 0)) <= 0) {
 	return printError("--SERVER-- ERROR: didn't receive any message from client", -1);
       }
@@ -153,7 +153,7 @@ int communicate(ws_client* node, char *next, uint64_t next_len) {
     }
 
     next_len = 0;
-  } while( !(buffer[0] & 0x80) );	
+  } while( !(buffer[0] & 0x80) );
 
   // Checking which type of frame the client has sent.
   if (node->message->opcode[0] == '\x88' || node->message->opcode[0] == '\x08') {
@@ -173,11 +173,11 @@ int communicate(ws_client* node, char *next, uint64_t next_len) {
     if ( 0 != status ) {
       return status;
     }
-    
+
   } else {
     printf("--SERVER-- Something very strange happened, received opcode: 0x%x\n\n", node->message->opcode[0]);
     return -1;
-  }  
+  }
 
   return 0;
 }
@@ -185,7 +185,7 @@ int communicate(ws_client* node, char *next, uint64_t next_len) {
 uint64_t ntohl64(uint64_t value) {
   static const int num = 42;
 
-  // If these check is true, the system is using the little endian 
+  // If these check is true, the system is using the little endian
   // convention. Else the system is using the big endian convention, which
   //  means that we do not have to represent our integers in another way.
   if (*(char *)&num == 42) {
@@ -195,38 +195,38 @@ uint64_t ntohl64(uint64_t value) {
     return (((uint64_t)(htonl(low))) << 32) | htonl(high);
   } else {
     return value;
-  }	
+  }
 }
 
 int encodeMessage(ws_message* message) {
   uint64_t length = message->len;
   uint16_t sz16;
   uint64_t sz64;
-  
+
   if (message->len <= 125) {
     length += 2;
     message->enc = (char*) malloc(sizeof(char) * length);
     if (NULL == message->enc) {
       return printError("--SERVER-- ERROR: Couldn't allocate memory for message 001", -1);
     }
-    
+
     message->enc[0] = '\x81';
     message->enc[1] = message->len;
     memcpy(message->enc + 2, message->msg, message->len);
-    
+
   } else if (message->len <= 65535) {
     length += 4;
     message->enc = (char*) malloc(sizeof(char) * length);
     if (NULL == message->enc) {
       return printError("--SERVER-- ERROR: Couldn't allocate memory for message 002", -1);
     }
-    
+
     message->enc[0] = '\x81';
     message->enc[1] = 126;
     sz16 = htons(message->len);
     memcpy(message->enc + 2, &sz16, sizeof(uint16_t));
     memcpy(message->enc + 4, message->msg, message->len);
-    
+
   } else {
     length += 10;
     message->enc = (char*) malloc(sizeof(char) * length);
@@ -269,7 +269,7 @@ int parseMessage(char* buffer, uint64_t buffer_length, ws_client* node) {
    * length that the frame has set.
    *
    * length <= 125: We know that length is the actual length of the message,
-   * 				  and that the maskin data must be placed 2 bytes further 
+   * 				  and that the maskin data must be placed 2 bytes further
    * 				  ahead.
    * length == 126: We know that the length is an unsigned 16 bit integer,
    * 				  which is placed at the 2 next bytes, and that the masking
@@ -279,7 +279,7 @@ int parseMessage(char* buffer, uint64_t buffer_length, ws_client* node) {
    * 				  data must be further 2 bytes away.
    */
   if (length <= 125) {
-    message->len += length;	
+    message->len += length;
     skip = 6;
     memcpy(&message->mask, buffer + 2, sizeof(message->mask));
   } else if (length == 126) {
@@ -300,7 +300,7 @@ int parseMessage(char* buffer, uint64_t buffer_length, ws_client* node) {
     memcpy(&message->mask, buffer + 10, sizeof(message->mask));
   } else {
     printf("--SERVER-- Obscure length received from client: %d\n\n", length);
-    return -1;	
+    return -1;
   }
 
   // If the message length is greater that our MAXMESSAGE constant
@@ -308,7 +308,7 @@ int parseMessage(char* buffer, uint64_t buffer_length, ws_client* node) {
   if (message->len > MAX_MESSAGE_SIZE) {
     return printError("--SERVER-- Message received was bigger than MAX_MESSAGE_SIZE", -1);
   }
-	
+
   // Allocating memory to hold the message sent from the client.
   // We can do this because we now know the actual length ofr the message.
   message->msg = (char*) malloc(sizeof(char) * (message->len + 1));
@@ -330,7 +330,7 @@ int parseMessage(char* buffer, uint64_t buffer_length, ws_client* node) {
     memset(message->next, '\0', next_len);
     memcpy(message->next, buffer + (message->len+skip), next_len);
     message->next_len = next_len;
-    buf_len = message->len;	
+    buf_len = message->len;
   }
 
   memcpy(message->msg+message_length, buffer+skip, buf_len);
@@ -349,7 +349,7 @@ int parseMessage(char* buffer, uint64_t buffer_length, ws_client* node) {
   // If this is true, our receival of the message has gone wrong
   // and we have no other choice than closing the connection.
   if (message_length != message->len) {
-    printf("--SERVER-- Message does not fit. Expected: %d but got %d\n\n", 
+    printf("--SERVER-- Message does not fit. Expected: %d but got %d\n\n",
 	   (int) message->len, (int) message_length);
     return -1;
   }
@@ -364,7 +364,7 @@ int parseMessage(char* buffer, uint64_t buffer_length, ws_client* node) {
 
 
 uint64_t getRemainingMessage(ws_client* node, uint64_t msg_length) {
-  int buffer_length = 0; 
+  int buffer_length = 0;
   uint64_t remaining_length = 0;
   uint64_t final_length = 0;
   char buffer[BUFFER_SIZE];
@@ -372,21 +372,20 @@ uint64_t getRemainingMessage(ws_client* node, uint64_t msg_length) {
 
   do {
     memset(buffer, '\0', BUFFER_SIZE);
-	
+
     // Receive new chunk of the message.
     if ((buffer_length = recv(node->socket_id, buffer, BUFFER_SIZE, 0)) <= 0) {
       printf("--SERVER-- Didn't receive anything from remaining part of message. %d"
 	     "\n\n", buffer_length);
-      return 0;	
+      return 0;
     }
-    
+
     // The overall length of the message received. Because the recv call
     // eventually will merge messages together we have to have a check
     // whether the overall length we received is greater than the expected
-    // length of the message. 
+    // length of the message.
     final_length = (msg_length+remaining_length+buffer_length);
-    
-   
+
     // If the overall message is longer than the expected length of the
     // message, we know that this chunk most contain the last part of the
     // original message, and the first chunk of a new message.
@@ -396,7 +395,7 @@ uint64_t getRemainingMessage(ws_client* node, uint64_t msg_length) {
       if (message->next == NULL) {
 	return printError("--SERVER-- ERROR: Couldn't allocate memory for message 100\n", 0);
       }
-      
+
       memset(message->next, '\0', next_len);
       memcpy(message->next, buffer + (buffer_length - next_len), next_len);
       message->next_len = next_len;
@@ -405,7 +404,7 @@ uint64_t getRemainingMessage(ws_client* node, uint64_t msg_length) {
 
     remaining_length += buffer_length;
 
-    memcpy(message->msg + (msg_length+(remaining_length-buffer_length)), buffer, 
+    memcpy(message->msg + (msg_length+(remaining_length-buffer_length)), buffer,
 	   buffer_length);
   } while( (msg_length + remaining_length) < message->len );
 
@@ -415,12 +414,14 @@ uint64_t getRemainingMessage(ws_client* node, uint64_t msg_length) {
 // Expects all callbacks to be of form type:value
 void callbackHandler(char* message) {
 
-  const char s[2] = ":";
-  
-  // again assuming correct data sent
-  // I am only one sending sockets so should be find
-  int type = atoi(strtok(message, s));
-  char* value = strtok(NULL, s);
+  char *err;
 
-  g_server->onData(type, value); 
+  // null pointer the first : ad send first part as number and rest as const char*
+  char* value = strchr(message, ':');
+  if (value == NULL) { return; }
+  memset(value, '\0', 1);
+
+  long int type = strtol(message, &err, 10);
+
+  g_server->onSocketMessage(type, (const char*)value+1);
 }

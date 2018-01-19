@@ -29,7 +29,7 @@ void getTime(char** timestamp, int length) {
 
   info = localtime( &raw_time );
 
-  strftime(*timestamp, length, "%a, %d %b %Y %H:%M:%S %Z", info);  
+  strftime(*timestamp, length, "%a, %d %b %Y %H:%M:%S %Z", info);
 }
 
 
@@ -37,15 +37,15 @@ void getTime(char** timestamp, int length) {
 // return Empty list
 ws_list* listNew (void) {
   ws_list* list = (ws_list*) malloc(sizeof(ws_list));
-	
+
   if (NULL != list) {
     list->len = 0;
     list->first = list->last = NULL;
-    pthread_mutex_init(&list->lock, NULL);	
+    pthread_mutex_init(&list->lock, NULL);
   } else {
     printFatal("Can't allocated ws_list*", 20);
   }
-  
+
   return list;
 }
 
@@ -54,22 +54,22 @@ void listFree (ws_list* list) {
   ws_client *node, *previous;
   pthread_mutex_lock(&list->lock);
   node = list->first;
-  
+
   while (NULL != node) {
     previous = node->next;
     wsCloseframe(node);
     // sys/socket shutdown call
     // DRWR disables further send and receives
     shutdown(node->socket_id, SHUT_RDWR);
-    
-    wsClientFree(node);    
+
+    wsClientFree(node);
     close(node->socket_id);
     free(node);
     node = previous;
   }
 
   list->first = list->last = NULL;
-  pthread_mutex_unlock(&list->lock);	
+  pthread_mutex_unlock(&list->lock);
   pthread_mutex_destroy(&list->lock);
   free(list);
 }
@@ -77,13 +77,13 @@ void listFree (ws_list* list) {
 // Adds a node to the list
 void listAdd (ws_list* list, ws_client* node) {
   pthread_mutex_lock(&list->lock);
-  
+
   if (NULL != list->first) {
-    list->last = list->last->next = node;	
+    list->last = list->last->next = node;
   } else {
-    list->first = list->last = node;	
+    list->first = list->last = node;
   }
-  
+
   list->len++;
   pthread_mutex_unlock(&list->lock);
 }
@@ -93,12 +93,12 @@ void listRemove (ws_list* list, ws_client* remove) {
   ws_client *node, *previous;
   pthread_mutex_lock(&list->lock);
   node = list->first;
-  
+
   if (NULL == node || NULL == remove) {
     pthread_mutex_unlock(&list->lock);
     return;
   }
-  
+
   do {
     if (node == remove) {
       if (node == list->first) {
@@ -106,7 +106,7 @@ void listRemove (ws_list* list, ws_client* remove) {
       } else {
 	previous->next = node->next;
       }
-      
+
       if (node == list->last) {
 	list->last = previous;
       }
@@ -121,10 +121,10 @@ void listRemove (ws_list* list, ws_client* remove) {
       list->len--;
       break;
     }
-		
+
     previous = node;
     node = node->next;
-  } while (NULL != node); 
+  } while (NULL != node);
 
   if (0 == list->len) {
     list->first = list->last = NULL;
@@ -150,7 +150,7 @@ void listRemoveAll (ws_list* list) {
   do {
     wsCloseframe(node);
     node = node->next;
-  } while (NULL != node); 
+  } while (NULL != node);
 
   pthread_mutex_unlock(&list->lock);
 }
@@ -220,7 +220,7 @@ void listMulticastAll(ws_list* list, ws_message* message) {
 // Functions which creates the closeframe.
 void wsCloseframe(ws_client* client) {
   char frame[2];
-  
+
   frame[0] = '\x88';
   frame[1] = '\x00';
 
@@ -288,7 +288,7 @@ ws_message* messageNew() {
   if (NULL != message) {
     memset(message->opcode, '\0', 1);
     memset(message->mask, '\0', 4);
-    message->len = 0; 
+    message->len = 0;
     message->enc_len = 0;
     message->next_len = 0;
     message->msg = NULL;
@@ -296,7 +296,7 @@ ws_message* messageNew() {
     message->enc = NULL;
   }
 
-  return message;	
+  return message;
 }
 
 // Frees all allocations in the header structure.
@@ -306,12 +306,12 @@ void headerFree(request_header* header) {
     free(header->accept);
     header->accept = NULL;
   }
-  
+
   if (NULL != header->route) {
     free(header->route);
     header->route = NULL;
   }
-  
+
   /* if (NULL != header->ws_key) {
     free(header->ws_key);
     header->ws_key = NULL;
@@ -334,7 +334,7 @@ void messageFree(ws_message* message) {
     free(message->msg);
     message->msg = NULL;
   }
-	
+
   if (NULL != message->enc) {
     free(message->enc);
     message->enc = NULL;
@@ -347,14 +347,14 @@ void messageFree(ws_message* message) {
 
 }
 
-// Frees all allocations in the node, including the header and message 
+// Frees all allocations in the node, including the header and message
 void wsClientFree(ws_client* client) {
 
   if (NULL != client->client_ip) {
     free(client->client_ip);
     client->client_ip = NULL;
   }
-  
+
   if (NULL != client->header) {
     headerFree(client->header);
     free(client->header);

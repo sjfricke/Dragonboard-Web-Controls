@@ -4,7 +4,7 @@ int callApiRoute(char** request_HTTP, char** response_HTTP, char* route, http_t*
 {
   //  char* request_body;
   int status;
-  
+
   // Get HTTP Verb Type
   if (strncmp(*request_HTTP, "GET", 3) == 0) {
 
@@ -29,6 +29,6 @@ int callApiRoute(char** request_HTTP, char** response_HTTP, char* route, http_t*
 
 
   // request_body = strstr(*http_request, "\n");
-  
+
   return 0;
 }
