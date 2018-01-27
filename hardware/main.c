@@ -1,5 +1,9 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <poll.h>
+#include <fcntl.h> // open()
+#include <pthread.h>
+
 #include "server/server.h"
 #include "modules/gpio.h"
 #include "modules/wifi.h"
@@ -34,13 +38,40 @@ void socketCallback( int type, const char* value) {
   }
 }
 
+// Checks for GPIO input on pin 35
+void* pollButton(void* notInUse) {
+  struct pollfd pfd;
+  int fd;
+  char buf;
+  GpioInput(35);
+  
+  fd = open("/sys/class/gpio/gpio35/value", O_RDONLY);
+  if (fd < 0) {
+    puts("ERROR: Could not open file:\n");
+    return (void*) -1;
+  }
+  
+  pfd.fd = fd;
+  pfd.events = POLLPRI;
+  
+  // consume any prior interrupt
+  lseek(fd, 0, SEEK_SET);
+  read(fd, &buf, 1);
+
+  
+  while(1) {
+    poll(&pfd, 1, -1);
+    
+    lseek(fd, 0, SEEK_SET);
+    read(fd, &buf, 1);
+
+    // buf is 0x30 or 0x31
+    broadcastInt("5", buf & 0x1);
+  }
+}
+
+
 int main ( int argc, char* argv[] ) {
-
-  //  char command[256];
-
-  //  double cur_temp;
-  //  FILE* temp_file;
-  //  char* sys_temp = "/sys/class/thermal/thermal_zone0/temp";
 
   g_server = (server_t*)malloc(sizeof(server_t));
   g_server->port = 8000;
@@ -48,31 +79,25 @@ int main ( int argc, char* argv[] ) {
 
   startServer();
 
-  
   int wMaxName = 48;
   int wMaxList = 16;
   char** wList;
+  pthread_t buttonThread;
 
+  // allocate for wifi list
   wList = (char**)malloc(sizeof(char*) * wMaxList);
   for (int i = 0; i < wMaxList; i++) {
     wList[i] = (char*)malloc(sizeof(char) * wMaxName);
   }
-  
 
-
-  int button = GpioInputPin(33);
-  //  int led = GpioOutputPin(34, 0);
+  // Kick off temperature thread
+  int rc = pthread_create(&buttonThread, NULL, pollButton, NULL);
+  if (rc) {
+    printf("ERROR: Can't create button thread");
+  }
   
-  //  temp_file = fopen(sys_temp, "r");
+  // main infinite loop
   while(1) {
-
-    // remember buttons are pull-down resistors
-    int button_status = GpioGetValue(button);
-    if (button_status == 0) {
-      broadcastInt("5", 1);
-    } else {
-      broadcastInt("5", 0);
-    }
 
     status = WifiScan(wList, wMaxList, wMaxName, 0x1);
     broadcastInt("3", 0);
@@ -80,13 +105,10 @@ int main ( int argc, char* argv[] ) {
       broadcastString("4", wList[i]);
     }
 
-    //fscanf(temp_file, "%lf", &cur_temp);
-    // cur_temp /= 1000;
-   //printf("Temp: %lf degrees\n", cur_temp);
-    // rewind(temp_file); // need to rewind file pointer
     usleep(5000000); // 5 sec
   }
 
+  // CLEAN UP
   for (int i = 0; i < wMaxList; i++) {
     free(wList[i]);
   }

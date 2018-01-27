@@ -32,7 +32,7 @@ int WifiScan(char** list, int maxListLen, int maxNameLen, int options) {
 
     if ((options & 0x1) != 0) {
       rcpilevel = (result->stats.qual.level / 2.0) - 110.0;
-      sprintf(buffer, "%s [%g dBm]", result->b.essid, rcpilevel);
+      sprintf(buffer, "%s [ %g dBm ]", result->b.essid, rcpilevel);
 
       strncpy(list[resCount], buffer, maxNameLen);
     } else {

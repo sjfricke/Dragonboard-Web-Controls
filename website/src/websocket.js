@@ -33,7 +33,7 @@ console.log(event);
     updateWiFi(message.value);
     break;
   case 5: // button color changer
-      if (message.value == 1) {
+      if (message.value == 0) {
 	  document.body.style.backgroundColor = "red";
       } else {
 	  document.body.style.backgroundColor = "white";

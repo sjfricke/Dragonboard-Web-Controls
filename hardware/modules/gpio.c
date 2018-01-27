@@ -6,7 +6,7 @@ uint16_t GpioDB410cMapping(uint16_t pin) {
     printf("ERROR: Pin %d does not have a GPIO pin mapped\n", pin);
     return 0;
   }
-  
+
   switch(pin) {
   case 23: return 36;
   case 24: return 12;
@@ -67,9 +67,9 @@ int GpioSetDirection(uint16_t gpio, char* direction) {
   }
 
   fputs(direction, fp);
- 
+
   fclose(fp);
-  return 0; 
+  return 0;
 }
 
 int GpioGetDirection(uint16_t gpio) {
@@ -77,7 +77,7 @@ int GpioGetDirection(uint16_t gpio) {
   char direction_path[64];
   char direction[8];
   int return_direction;
-  
+
   sprintf(direction_path, "/sys/class/gpio/gpio%u/direction", gpio);
 
   fp = fopen(direction_path, "r");
@@ -87,7 +87,7 @@ int GpioGetDirection(uint16_t gpio) {
   }
 
   fscanf(fp, "%s", direction);
-  
+
   if (strncmp(direction, IN, 2) == 0) {
     return_direction = 0;
   } else if (strncmp(direction, OUT, 3) == 0) {
@@ -96,7 +96,7 @@ int GpioGetDirection(uint16_t gpio) {
     return_direction = -1;
     printf("ERROR: Unknown direction of %s\n", direction);
   }
- 
+
   fclose(fp);
   return return_direction;
 }
@@ -106,7 +106,7 @@ int GpioSetValue(uint16_t gpio, uint16_t value) {
   char value_path[64];
 
   sprintf(value_path, "/sys/class/gpio/gpio%u/value", gpio);
-  
+
   fp = fopen(value_path, "w");
   if (fp == NULL) {
     printf("ERROR: Could not open file: %s\n", value_path);
@@ -124,16 +124,16 @@ int GpioSetValue(uint16_t gpio, uint16_t value) {
   }
 
   fclose(fp);
-  return 0; 
+  return 0;
 }
 
 int GpioGetValue(uint16_t gpio) {
   FILE *fp;
   char value_path[64];
   char value[8];
-  
+
   sprintf(value_path, "/sys/class/gpio/gpio%u/value", gpio);
-  
+
   fp = fopen(value_path, "r");
   if (fp == NULL) {
     printf("ERROR: Could not open file: %s\n", value_path);
@@ -144,7 +144,7 @@ int GpioGetValue(uint16_t gpio) {
 
   fclose(fp);
 
-  return atoi(value);   
+  return atoi(value);
 }
 
 uint16_t GpioInput(uint16_t gpio) {
