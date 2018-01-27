@@ -79,19 +79,19 @@ int main ( int argc, char* argv[] ) {
 
   startServer();
 
-  int wMaxName = 48;
-  int wMaxList = 16;
-  char** wList;
-  pthread_t buttonThread;
+  int w_max_name = 48;
+  int w_max_list = 16;
+  char** w_list;
+  pthread_t button_thread;
 
   // allocate for wifi list
-  wList = (char**)malloc(sizeof(char*) * wMaxList);
-  for (int i = 0; i < wMaxList; i++) {
-    wList[i] = (char*)malloc(sizeof(char) * wMaxName);
+  w_list = (char**)malloc(sizeof(char*) * w_max_list);
+  for (int i = 0; i < w_max_list; i++) {
+    w_list[i] = (char*)malloc(sizeof(char) * w_max_name);
   }
 
   // Kick off temperature thread
-  int rc = pthread_create(&buttonThread, NULL, pollButton, NULL);
+  int rc = pthread_create(&button_thread, NULL, pollButton, NULL);
   if (rc) {
     printf("ERROR: Can't create button thread");
   }
@@ -99,19 +99,19 @@ int main ( int argc, char* argv[] ) {
   // main infinite loop
   while(1) {
 
-    status = WifiScan(wList, wMaxList, wMaxName, 0x1);
+    status = wifiScan(w_list, w_max_list, w_max_name, 0x1);
     broadcastInt("3", 0);
     for (int i = 0; i < status; i++) {
-      broadcastString("4", wList[i]);
+      broadcastString("4", w_list[i]);
     }
 
     usleep(5000000); // 5 sec
   }
 
   // CLEAN UP
-  for (int i = 0; i < wMaxList; i++) {
-    free(wList[i]);
+  for (int i = 0; i < w_max_list; i++) {
+    free(w_list[i]);
   }
-  free(wList);
+  free(w_list);
 
 }

@@ -1,13 +1,13 @@
 #include "wifi.h"
 
-int WifiScan(char** list, int maxListLen, int maxNameLen, int options) {
+int wifiScan(char** list, int max_list_len, int max_name_len, int options) {
 
   wireless_scan_head head;
   wireless_scan *result;
   iwrange range;
   int sock;
-  int resCount = 0;
-  int scanCount = 0;
+  int res_count = 0;
+  int scan_count = 0;
   double rcpilevel;
   char buffer[256];
 
@@ -28,21 +28,21 @@ int WifiScan(char** list, int maxListLen, int maxNameLen, int options) {
 
   /* Traverse the results */
   result = head.result;
-  while (NULL != result && resCount < maxListLen) {
+  while (NULL != result && res_count < max_list_len) {
 
     if ((options & 0x1) != 0) {
       rcpilevel = (result->stats.qual.level / 2.0) - 110.0;
       sprintf(buffer, "%s [ %g dBm ]", result->b.essid, rcpilevel);
 
-      strncpy(list[resCount], buffer, maxNameLen);
+      strncpy(list[res_count], buffer, max_name_len);
     } else {
-      strncpy(list[resCount], result->b.essid, maxNameLen);
+      strncpy(list[res_count], result->b.essid, max_name_len);
     }
 
     result = result->next;
-    scanCount++;
-    resCount++;
+    scan_count++;
+    res_count++;
   }
 
-  return scanCount;
+  return scan_count;
 }

@@ -14,6 +14,6 @@
 //
 // Options
 // 1: Will list dBm with name
-int WifiScan(char** list, int maxListLen, int maxNameLen, int options);
+int wifiScan(char** list, int max_list_len, int max_name_len, int options);
 
 
